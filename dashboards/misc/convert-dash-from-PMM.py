@@ -166,12 +166,17 @@ def main():
     with open(sys.argv[1], 'r') as dashboard_file:
         dashboard = json.loads(dashboard_file.read())
     print(f"Dashboard: {sys.argv[1],}")
+
     if get_dashboard_type(sys.argv[1]):    # replace service_name or node_name variables for different dashboard types
         check_formulas(dashboard, "service_name", "instance")
         fix_variable_label(dashboard, "Service Name", "Instance")
     else:
         check_formulas(dashboard, "node_name", "instance")
         fix_variable_label(dashboard, "Node Name", "Instance")
+
+    check_formulas(dashboard, "environment", "namespace")
+    fix_variable_label(dashboard, "Environment", "Namespace")
+
     # registered procedures.
     PROCEDURES = [add_datasource_variable, fix_datasource]
 
