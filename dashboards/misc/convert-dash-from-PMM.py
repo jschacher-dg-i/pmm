@@ -133,6 +133,23 @@ def fix_variable_label(dashboard, currentVariableLabel, newVariableLabel):
     return dashboard
 
 
+def set_variable_multi(dashboard, variableLabel, multi):
+    for element in dashboard.copy():
+        if 'templating' in element:
+            for list_index, lists in enumerate(dashboard['templating']['list']):
+                    if 'label' in list(lists.keys()):
+                        label = dashboard['templating']['list'][list_index]['label']
+                        if 'multi' in list(lists.keys()):
+                            currentMulti = dashboard['templating']['list'][list_index]['multi']
+                        else:
+                            currentMulti = "unset"
+                        if label == variableLabel and currentMulti != multi:    # check if variable is used in an expression
+                            print(f" <<<< [{variableLabel}] multi: {dashboard['templating']['list'][list_index]['multi']}")
+                            dashboard['templating']['list'][list_index]['multi'] = multi
+                            print(f" <<<< [{variableLabel}] multi: {dashboard['templating']['list'][list_index]['multi']}\n")
+    return dashboard
+
+
 def get_dashboard_type(filename):
     for service in services: 
         if filename.find(service) != -1:    # check if it's a dashboard with node metrics only
@@ -176,6 +193,7 @@ def main():
 
     check_formulas(dashboard, "environment", "namespace")
     fix_variable_label(dashboard, "Environment", "Namespace")
+    set_variable_multi(dashboard, "Namespace", False)
 
     # registered procedures.
     PROCEDURES = [add_datasource_variable, fix_datasource]
