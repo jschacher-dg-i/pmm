@@ -150,6 +150,21 @@ def set_variable_multi(dashboard, variableLabel, multi):
     return dashboard
 
 
+def remove_annotation(dashboard, annotationName):
+    def keep_annotations(elem):
+        if 'name' in elem:
+            if elem['name'] != annotationName:
+                return True
+            else:
+                print(f" <<<< annotation: {annotationName}\n")
+                return False
+        return True
+
+    if 'annotations' in dashboard:
+        annotations = list(filter(keep_annotations, dashboard['annotations']['list']))
+        dashboard['annotations']['list'] = annotations
+
+
 def get_dashboard_type(filename):
     for service in services: 
         if filename.find(service) != -1:    # check if it's a dashboard with node metrics only
@@ -194,6 +209,8 @@ def main():
     check_formulas(dashboard, "environment", "namespace")
     fix_variable_label(dashboard, "Environment", "Namespace")
     set_variable_multi(dashboard, "Namespace", False)
+
+    remove_annotation(dashboard, "PMM Annotations")
 
     # registered procedures.
     PROCEDURES = [add_datasource_variable, fix_datasource]
