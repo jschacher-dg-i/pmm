@@ -99,6 +99,15 @@ def check_formulas(dashboard, currentVariableName, newVariableName):
                                                 dashboard['panels'][panel_index]['panels'][panelIn_index]['targets'][target_index]['expr'] = expr.replace(currentVariableName, newVariableName)
                                                 print(f" >>>> {dashboard['panels'][panel_index]['panels'][panelIn_index]['targets'][target_index]['expr']}\n")
 
+                if 'title' in panel:
+                    title = dashboard['panels'][panel_index]['title']
+                    variable_reference = f"${currentVariableName}"
+                    new_variable_reference = f"${newVariableName}"
+                    if title.find(variable_reference) != -1:
+                            print(f" <<<< {title}") 
+                            dashboard['panels'][panel_index]['title'] = title.replace(variable_reference, new_variable_reference)
+                            print(f" >>>> {dashboard['panels'][panel_index]['title']}\n")
+
         if 'templating' in element:
             for list_index, lists in enumerate(dashboard['templating']['list']):
                     if 'query' in list(lists.keys()):
