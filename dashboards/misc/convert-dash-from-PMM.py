@@ -54,6 +54,12 @@ def fix_datasource(dashboard):
                                  if  dataSourceName is not None:
                                      dashboard['panels'][panel_index]['mappingTypes'][mappingTypes_index]['datasource'] = dataSourceName
 
+                if 'targets' in panel:
+                    for target_index, target in enumerate(dashboard['panels'][panel_index]['targets']):
+                        if 'datasource' in target:
+                            if dataSourceName is not None:
+                                dashboard['panels'][panel_index]['targets'][target_index]['datasource'] = dataSourceName
+
         if 'templating' in element:
             for panel_index, panel in enumerate(dashboard['templating']['list']):
                     if 'datasource' in list(panel.keys()):
@@ -88,16 +94,8 @@ def check_formulas(dashboard, currentVariableName, newVariableName):
 
                 if 'panels' in panel:
                         if len(dashboard['panels'][panel_index]['panels']) > 0:
-                            for panelIn_index, panelIn in enumerate(dashboard['panels'][panel_index]['panels']):
-                                if 'targets' in panelIn:
-                                    for target_index, target in enumerate(dashboard['panels'][panel_index]['panels'][panelIn_index]['targets']):
-                                        if 'expr' in target:
-                                            expr = dashboard['panels'][panel_index]['panels'][panelIn_index]['targets'][target_index]['expr']
-                                            expr = re.sub('node_type=~\"[a-z,$_|]*\"', '', expr)
-                                            if expr.find(currentVariableName) != -1:    # check if variable is used in an expression
-                                                print(f" <<<< {expr}")
-                                                dashboard['panels'][panel_index]['panels'][panelIn_index]['targets'][target_index]['expr'] = expr.replace(currentVariableName, newVariableName)
-                                                print(f" >>>> {dashboard['panels'][panel_index]['panels'][panelIn_index]['targets'][target_index]['expr']}\n")
+                            panel_as_dashboard = dashboard['panels'][panel_index]
+                            check_formulas(panel_as_dashboard, currentVariableName, newVariableName)
 
                 if 'title' in panel:
                     title = dashboard['panels'][panel_index]['title']
