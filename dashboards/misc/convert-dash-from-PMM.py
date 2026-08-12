@@ -120,6 +120,19 @@ def check_formulas(dashboard, currentVariableName, newVariableName):
     return dashboard
 
 
+def fix_variable_label(dashboard, currentVariableLabel, newVariableLabel):
+    for element in dashboard.copy():
+        if 'templating' in element:
+            for list_index, lists in enumerate(dashboard['templating']['list']):
+                    if 'label' in list(lists.keys()):
+                        label = dashboard['templating']['list'][list_index]['label']
+                        if label == currentVariableLabel:    # check if variable is used in an expression
+                            print(f" <<<< f{currentVariableLabel}")
+                            dashboard['templating']['list'][list_index]['label'] = newVariableLabel
+                            print(f" >>>> {dashboard['templating']['list'][list_index]['label']}\n")
+    return dashboard
+
+
 def get_dashboard_type(filename):
     for service in services: 
         if filename.find(service) != -1:    # check if it's a dashboard with node metrics only
@@ -154,9 +167,11 @@ def main():
         dashboard = json.loads(dashboard_file.read())
     print(f"Dashboard: {sys.argv[1],}")
     if get_dashboard_type(sys.argv[1]):    # replace service_name or node_name variables for different dashboard types
-       check_formulas(dashboard, "service_name", "instance")
+        check_formulas(dashboard, "service_name", "instance")
+        fix_variable_label(dashboard, "Service Name", "Instance")
     else:
-       check_formulas(dashboard, "node_name", "instance")
+        check_formulas(dashboard, "node_name", "instance")
+        fix_variable_label(dashboard, "Node Name", "Instance")
     # registered procedures.
     PROCEDURES = [add_datasource_variable, fix_datasource]
 
