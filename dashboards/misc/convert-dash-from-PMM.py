@@ -172,12 +172,12 @@ def remove_annotation(dashboard, annotationName):
         dashboard['annotations']['list'] = annotations
 
 
-def get_dashboard_type(filename):
-    for service in services: 
+def get_dashboard_service(filename):
+    for service in services:
         if filename.find(service) != -1:    # check if it's a dashboard with node metrics only
             print(f"{service} service dashboard is detected")
-            return True
-    return False
+            return service
+    return None
 
 
 # Additional procedure for modifing auxiliary variables 
@@ -206,16 +206,23 @@ def main():
         dashboard = json.loads(dashboard_file.read())
     print(f"Dashboard: {sys.argv[1],}")
 
-    if get_dashboard_type(sys.argv[1]):    # replace service_name or node_name variables for different dashboard types
+    dashboard_service = get_dashboard_service(sys.argv[1])
+    # replace service_name or node_name variables, as well as additional variables, for different dashboard types
+    # also replace with different values for different services
+    if dashboard_service == 'MongoDB':
+        check_formulas(dashboard, "service_name", "pod")
+        fix_variable_label(dashboard, "Service Name", "Pod")
+        check_formulas(dashboard, "cluster", "namespace")
+        fix_variable_label(dashboard, "Cluster", "Namespace")
+    elif dashboard_service is not None:
         check_formulas(dashboard, "service_name", "instance")
         fix_variable_label(dashboard, "Service Name", "Instance")
+        check_formulas(dashboard, "environment", "namespace")
+        fix_variable_label(dashboard, "Environment", "Namespace")
+        set_variable_multi(dashboard, "Namespace", False)
     else:
         check_formulas(dashboard, "node_name", "instance")
         fix_variable_label(dashboard, "Node Name", "Instance")
-
-    check_formulas(dashboard, "environment", "namespace")
-    fix_variable_label(dashboard, "Environment", "Namespace")
-    set_variable_multi(dashboard, "Namespace", False)
 
     remove_annotation(dashboard, "PMM Annotations")
 
